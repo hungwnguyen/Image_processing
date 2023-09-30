@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class WebGLUpDownExamples : MonoBehaviour
+public class WebGLUpDownloadManager : MonoBehaviour
 {
-    public static WebGLUpload _webGLUpload = null;
-    public static WebGLDownload _webGLDownload = null;
-    public RawImage _targetImage = null;
+    private static WebGLUpload _webGLUpload = null;
+    private static WebGLDownload _webGLDownload = null;
+    [SerializeField] private RawImage _targetImage = null;
+    public static WebGLDownload WebGLDownload { get => _webGLDownload; }
+    public static WebGLUpload WebGLUpload { get => _webGLUpload; }
 
     private void Awake()
     {

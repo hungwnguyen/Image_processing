@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +10,7 @@ public class WebGLDownload : MonoBehaviour
         jpg,
         png
     }
-    public RawImage rawImage;
+    [SerializeField] private RawImage _targetImage = null;
     private bool _isRecording = false;
     [DllImport("__Internal")]
     private static extern void DownloadFileJsLib(byte[] byteArray, int byteLength, string fileName);
@@ -25,11 +25,11 @@ public class WebGLDownload : MonoBehaviour
     {
         if (fileName == "") fileName = "UnnamedFile";
 #if UNITY_EDITOR
-        string path = UnityEditor.EditorUtility.SaveFilePanel("Save file...", "", fileName + "MakeByNTH", fileExtension);
+        string path = UnityEditor.EditorUtility.SaveFilePanel("Save file...", "", fileName + "MadeByNTH", fileExtension);
         System.IO.File.WriteAllBytes(path, bytes);
         Debug.Log("File saved: " + path);
 #elif UNITY_WEBGL
-        DownloadFileJsLib(bytes, bytes.Length, fileName + "MakeByNTH" + "." + fileExtension);
+        DownloadFileJsLib(bytes, bytes.Length, "MadeByHungwNguyen" + "." + fileExtension);
 #endif
     }
 
@@ -55,13 +55,12 @@ public class WebGLDownload : MonoBehaviour
                 int resWidth = Camera.main.pixelWidth * screenshotUpscale;
                 int resHeight = Camera.main.pixelHeight * screenshotUpscale;
                 string dateFormat = "yyyy-MM-dd-HH-mm-ss";
-                fileName = resWidth.ToString() + "x" + resHeight.ToString() + "px_" + System.DateTime.Now.ToString(dateFormat);
+                fileName = System.DateTime.Now.ToString(dateFormat);
             }
             
-            Texture2D screenShot = CreateReadableTexture(rawImage.texture as Texture2D);
+            Texture2D screenShot = CreateReadableTexture(_targetImage.texture as Texture2D);
             //Texture2D screenShot = ScreenCapture.CaptureScreenshotAsTexture(screenshotUpscale);
-            if (imageFormat == ImageFormat.jpg) DownloadFile(screenShot.EncodeToJPG(), fileName, "jpg");
-            else if (imageFormat == ImageFormat.png) DownloadFile(screenShot.EncodeToPNG(), fileName, "png");
+            this.DownloadTexture(screenShot, imageFormat, fileName);
             Object.Destroy(screenShot);
         }
         catch (System.Exception e)
@@ -71,62 +70,34 @@ public class WebGLDownload : MonoBehaviour
         _isRecording = false;
     }
 
-    private Texture2D CreateReadableTexture(Texture2D sourceTexture)
+    public Texture2D CreateReadableTexture(Texture2D sourceTexture)
     {
         if (sourceTexture == null)
         {
             Debug.LogError("Source texture is null.");
             return null;
         }
+
+        RenderTexture rt = RenderTexture.GetTemporary(sourceTexture.width, sourceTexture.height);
+        Graphics.Blit(sourceTexture, rt);
+        RenderTexture previous = RenderTexture.active;
+        RenderTexture.active = rt;
+
         Texture2D readableTexture = new Texture2D(sourceTexture.width, sourceTexture.height, sourceTexture.format, false);
-        Graphics.CopyTexture(sourceTexture, readableTexture);
+        readableTexture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
         readableTexture.Apply();
 
-        // Get pixels
-        Color[] pixels = readableTexture.GetPixels();
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(rt);
 
-        // Width and height
-        int width = readableTexture.width;
-        int height = readableTexture.height;
+        return readableTexture;
+    }
 
-        // Loop through each pixel
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                // Get current pixel
-                Color pixel = pixels[x + y * width];
-
-                // Calculate brightness
-                float brightness = 0.299f * pixel.r + 0.587f * pixel.g + 0.114f * pixel.b;
-
-                // Calculate the opposite color
-                Color opposite = new Color(1.0f - pixel.r, 1.0f - pixel.g, 1.0f - pixel.b);
-
-                // Calculate the brightness of the opposite color
-                float oppositeBrightness = 0.299f * opposite.r + 0.587f * opposite.g + 0.114f * opposite.b;
-
-                // Modify the pixel value
-                pixel = new Color(
-                    brightness + (oppositeBrightness - brightness),
-                    brightness + (oppositeBrightness - brightness),
-                    brightness + (oppositeBrightness - brightness),
-                    pixel.a);
-
-                // Set new pixel value
-                pixels[x + y * width] = pixel;
-            }
-        }
-        Object.Destroy(readableTexture);
-        // Set pixels and update texture
-        Texture2D newTexture = new Texture2D(width, height, sourceTexture.format, false, true);
-        newTexture.SetPixels(pixels, 0);
-        newTexture.Apply();
-
-        Texture2D readableNewTexture = new Texture2D(width, height, sourceTexture.format, false);
-        Graphics.CopyTexture(newTexture, readableNewTexture);
-        readableNewTexture.Apply();
-        Object.Destroy(newTexture);
-        return readableNewTexture;
+    private void DownloadTexture(Texture2D tex, WebGLDownload.ImageFormat imageFormat, string fileName)
+    {
+        byte[] texBytes;
+        if (imageFormat == WebGLDownload.ImageFormat.png) texBytes = tex.EncodeToPNG();
+        else texBytes = tex.EncodeToJPG();
+        DownloadFile(texBytes, fileName, imageFormat.ToString());
     }
 }

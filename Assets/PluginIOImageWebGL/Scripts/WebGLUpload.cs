@@ -27,6 +27,7 @@ public class WebGLUpload : MonoBehaviour
     private string _fileName = "";
     public string FileName { get => _fileName; }
     [SerializeField] private RectTransform _imageTransform;
+    [SerializeField] private RawImage _targetImageOut = null;
     public RectTransform ImageTransform { get => _imageTransform; }
     /// <summary>
     /// ___
@@ -81,7 +82,11 @@ public class WebGLUpload : MonoBehaviour
             _imageTransform.sizeDelta = new Vector2(texture.width, texture.height);
             //apply the texture to a material or image
             if (_targetMaterial) SetMaterialTexture(_targetMaterial, texture, false);
-            else if (_targetImage) _targetImage.texture = texture;
+            else if (_targetImage)
+            {
+                _targetImage.texture = texture;
+                _targetImageOut.texture = texture;
+            }
             else
             {
                 //Do something with the texture...

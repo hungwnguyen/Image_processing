@@ -111,55 +111,6 @@ namespace Michsky.MUIP
             }
         }
 
-        public void OpenFirstTab()
-        {
-            if (currentWindowIndex != 0)
-            {
-                currentWindow = windows[currentWindowIndex].windowObject;
-                currentWindowAnimator = currentWindow.GetComponent<Animator>();
-                currentWindowAnimator.Play(windowFadeOut);
-
-                if (windows[currentWindowIndex].buttonObject != null)
-                {
-                    currentButton = windows[currentWindowIndex].buttonObject;
-                    currentButtonAnimator = currentButton.GetComponent<Animator>();
-                    currentButtonAnimator.Play(buttonFadeOut);
-                }
-
-                currentWindowIndex = 0;
-                currentButtonIndex = 0;
-               
-                currentWindow = windows[currentWindowIndex].windowObject;
-                currentWindowAnimator = currentWindow.GetComponent<Animator>();
-                currentWindowAnimator.Play(windowFadeIn);
-
-                if (windows[currentWindowIndex].firstSelected != null) { EventSystem.current.firstSelectedGameObject = windows[currentWindowIndex].firstSelected; }
-                if (windows[currentButtonIndex].buttonObject != null)
-                {
-                    currentButton = windows[currentButtonIndex].buttonObject;
-                    currentButtonAnimator = currentButton.GetComponent<Animator>();
-                    currentButtonAnimator.Play(buttonFadeIn);
-                }
-
-                onWindowChange.Invoke(currentWindowIndex);
-            }
-
-            else if (currentWindowIndex == 0)
-            {
-                currentWindow = windows[currentWindowIndex].windowObject;
-                currentWindowAnimator = currentWindow.GetComponent<Animator>();
-                currentWindowAnimator.Play(windowFadeIn);
-
-                if (windows[currentWindowIndex].firstSelected != null) { EventSystem.current.firstSelectedGameObject = windows[currentWindowIndex].firstSelected; }
-                if (windows[currentButtonIndex].buttonObject != null)
-                {
-                    currentButton = windows[currentButtonIndex].buttonObject;
-                    currentButtonAnimator = currentButton.GetComponent<Animator>();
-                    currentButtonAnimator.Play(buttonFadeIn);
-                }
-            }
-        }
-
         public void OpenWindow(string newWindow)
         {
             for (int i = 0; i < windows.Count; i++)

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Image Processing</title>
+	<link rel="icon" href="TemplateData/Loading Icon.png" type="image/x-icon">
+	<link rel="stylesheet" href="TemplateData/style.css">
+</head>
+
+<body>
+	<div id="gameContainer">
+		<canvas id="unity-canvas" data-pixel-art=""></canvas>
+		<div id="unity-custom-loading-screen">
+			<div id="custom-logo"></div>
+			<div id="custom-loader">
+			  <div class="fill"></div>
+			  <div class="label"></div>
+			</div>
+		</div>
+		<script src="Build/WebGL.loader.js"></script>
+		<script>
+			var loadingScreen = document.querySelector("#unity-custom-loading-screen");
+			var customLoadingBar = document.querySelector("#custom-loader");
+			var canvas = document.querySelector("#unity-canvas");
+			var config = {
+				dataUrl: "Build/WebGL.data",
+				frameworkUrl: "Build/WebGL.framework.js",
+				codeUrl: "Build/WebGL.wasm",
+				symbolsUrl: "Build/WebGL.symbols.json",
+				streamingAssetsUrl: "StreamingAssets",
+				companyName: "DefaultCompany",
+				productName: "Image Processing",
+				productVersion: "0.1",
+			};
+			var scaleToFit;
+			try {
+				scaleToFit = !!JSON.parse("");
+			} catch (e) {
+				scaleToFit = true;
+			}
+
+			function unityShowBanner(msg, type) {
+				function updateBannerVisibility() {
+				warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+				}
+				var div = document.createElement('div');
+				div.innerHTML = msg;
+				warningBanner.appendChild(div);
+				if (type == 'error') div.style = 'background: red; padding: 10px;';
+				else {
+				if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+				setTimeout(function() {
+					warningBanner.removeChild(div);
+					updateBannerVisibility();
+				}, 5000);
+				}
+				updateBannerVisibility();
+			}
+			
+			function onResize() {
+				var container = canvas.parentElement;
+				var w;
+				var h;
+
+				if (scaleToFit) {
+					w = window.innerWidth;
+					h = window.innerHeight;
+
+					var r = 422 / 750;
+
+					if (w * r > window.innerHeight) {
+						h = Math.min(h, Math.ceil(w / r));
+					} else {
+						w = Math.min(w, Math.ceil(h * r));
+					}
+				} else {
+					w = 422;
+					h = 750;
+				}
+
+				container.style.width = canvas.style.width = w + "px";
+				container.style.height = canvas.style.height = h + "px";
+				container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
+				container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
+			}
+
+			createUnityInstance(canvas, config,(progress) => {
+					unitySetLoaderProgressTo(progress);
+			}).then(function (instance) {
+				canvas = instance.Module.canvas;
+				onResize();
+				setTimeout(function() {
+					loadingScreen.style.display = "none";
+				}, 2000);
+			});
+			window.addEventListener('resize', onResize);
+			onResize();
+			// value - 0 to 1
+			function unitySetLoaderProgressTo(value)
+			{
+				const fill = customLoadingBar.getElementsByClassName("fill")[0];
+				const fillText = customLoadingBar.getElementsByClassName("label")[0];
+
+				fill.animate(
+				[
+					{ width: (value * 100) + "%" }
+				],
+				{
+					duration: 300,
+					fill: "forwards"
+				}
+				);
+
+				fillText.textContent = (value * 100).toFixed() + "%";
+			}
+
+			if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+				// Mobile device style: fill the whole browser client area with the game canvas:
+				const meta = document.createElement('meta');
+				meta.name = 'viewport';
+				meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+				document.getElementsByTagName('head')[0].appendChild(meta);
+			}
+		</script>
+	</div>
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 var UploadFilePlugin = {
   UploadFileJsLib: function(gameObjectName, methodName, fileExtension) {
+    console.log("start downloading!");
     var gameObject = UTF8ToString(gameObjectName);
     var method = UTF8ToString(methodName);
     var format = UTF8ToString(fileExtension);
@@ -17,7 +18,7 @@ var UploadFilePlugin = {
         this.value = null;
         var element = document.getElementById('UploadFileInput');
         element.parentNode.removeChild(element);
-	unitycanvas.removeEventListener('click', OpenFileDialog, false);
+  unitycanvas.removeEventListener('click', OpenFileDialog, false);
       };
       fileInput.onchange = function (event)
       {
@@ -26,7 +27,7 @@ var UploadFilePlugin = {
           var fn = event.target.files[0].name;
           var ext = fn.substring(fn.lastIndexOf('.')+1, fn.length)
           console.log('Filename: '+event.target.files[0].name+' / Extension: '+ext);
-	  if(ext == format) SendMessage(gameObject, method, URL.createObjectURL(event.target.files[0]));
+    if(ext == format) SendMessage(gameObject, method, URL.createObjectURL(event.target.files[0]));
           else console.log('File extension not allowed: '+ext);
         }
       };
@@ -36,9 +37,21 @@ var UploadFilePlugin = {
     {
       document.getElementById('UploadFileInput').click();
     };
-    unitycanvas.addEventListener('click', OpenFileDialog, false);
+
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      try {
+        unitycanvas.addEventListener('touchstart', OpenFileDialog, false);
+      } catch(error) {
+        console.log(error);
+        // xử lý lỗi tại đây...
+      }
+    } else {
+        unitycanvas.addEventListener('click', OpenFileDialog, false);
+    }
+    
   },
   UploadTextureJsLib: function(gameObjectName, methodName, maxSize, imageFormat) {
+    console.log("start downloading now!");
     var gameObject = UTF8ToString(gameObjectName);
     var method = UTF8ToString(methodName);
     var format = UTF8ToString(imageFormat);
@@ -63,7 +76,7 @@ var UploadFilePlugin = {
         this.value = null;
         var element = document.getElementById('UploadTextureInput');
         element.parentNode.removeChild(element);
-	unitycanvas.removeEventListener('click', OpenFileDialog, false);
+  unitycanvas.removeEventListener('click', OpenFileDialog, false);
       };
       fileInput.onchange = function (event)
       {
@@ -72,7 +85,7 @@ var UploadFilePlugin = {
           var fn = event.target.files[0].name;
           var ext = fn.substring(fn.lastIndexOf('.')+1, fn.length)
           console.log('Filename: '+event.target.files[0].name+' / Extension: '+ext);
-	  if((format == "png" && ext == format) || (format == "jpg" && (ext == format || ext == "jpeg" || ext == "png")))
+    if((format == "png" && ext == format) || (format == "jpg" && (ext == format || ext == "jpeg" || ext == "png")))
           {
             format = ext;
             if(maxSize > 0) resize_image(event.target.files[0])
@@ -83,11 +96,28 @@ var UploadFilePlugin = {
       };
       document.body.appendChild(fileInput);
     }
-    var OpenFileDialog = function()
-    {
-      document.getElementById('UploadTextureInput').click();
+    var OpenFileDialog = function() {
+      try {
+        var uploadTextureInput = document.getElementById('UploadTextureInput');
+        if (uploadTextureInput !== null) {
+          uploadTextureInput.click();
+        }
+      } catch(error) {
+        console.log(error);
+        // xử lý lỗi tại đây...
+      }
     };
-    unitycanvas.addEventListener('click', OpenFileDialog, false);
+
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      try {
+        unitycanvas.addEventListener('touchstart', OpenFileDialog, false);
+      } catch(error) {
+        console.log(error);
+        // xử lý lỗi tại đây...
+      }
+    } else {
+        unitycanvas.addEventListener('click', OpenFileDialog, false);
+    }
 
     //resize image function
     function resize_image(file)
