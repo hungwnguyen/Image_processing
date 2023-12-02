@@ -1,4 +1,4 @@
-# Image_processing fix 8 bit 
+# Image_processing from Nguyễn Tiến Hưng - MSV: B20DCCN341
 Link trang web đã deploy :
 https://imageprocessing-0z9y.onrender.com/
 Folder code các thuật toán :
